@@ -23,8 +23,8 @@ namespace DurableMemory
             outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
             outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
             outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
+            outputs.Add(await context.CallActivityAsync<string>(nameof(FinalActivity), "Complete"));
 
-            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
             return outputs;
         }
 
@@ -34,9 +34,25 @@ namespace DurableMemory
             ILogger logger = executionContext.GetLogger("SayHello");
             logger.LogInformation("Saying hello to {name}.", name);
 
-            logger.LogInformation(MemoryClass.AddMemory(100).ToString());
+            _ = Task.Factory.StartNew(async () =>
+            {
+                await MemoryClass.AddMemory(10, 500);
+            });
+
+            logger.LogInformation(MemoryClass.GetMemory()) ;
 
             return $"Hello {name}!";
+        }
+
+        [Function(nameof(FinalActivity))]
+        public static string FinalActivity([ActivityTrigger] string input, FunctionContext executionContext)
+        {
+            ILogger logger = executionContext.GetLogger("FinalActivity: Clearing Memory Used by Orchestration");
+            logger.LogInformation(input);
+
+            MemoryClass.ClearMemory();
+
+            return input;
         }
 
         [Function("durable_HttpStart")]
