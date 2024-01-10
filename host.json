@@ -2,8 +2,11 @@
   "version": "2.0",
   "extensions": {
     "durableTask": {
-      "maxConcurrentActivityFunctions": 1,
-      "maxConcurrentOrchestratorFunctions": 1
+      "storageProvider": {
+        "maxQueuePollingInterval": "00:00:01"
+      },
+      "maxConcurrentActivityFunctions": 30,
+      "maxConcurrentOrchestratorFunctions": 10
     }
   },
     "logging": {

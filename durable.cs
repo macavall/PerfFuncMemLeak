@@ -6,13 +6,14 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PerfTestDLL;
+using System;
 
 namespace DurableMemory
 {
     public static class durable
     {
         [Function(nameof(durable))]
-        public static async Task<List<string>> RunOrchestrator(
+        public static async Task<string> RunOrchestrator(
             [OrchestrationTrigger] TaskOrchestrationContext context)
         {
             ILogger logger = context.CreateReplaySafeLogger(nameof(durable));
@@ -20,12 +21,25 @@ namespace DurableMemory
             var outputs = new List<string>();
 
             // Replace name and input with values relevant for your Durable Functions Activity
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
-            outputs.Add(await context.CallActivityAsync<string>(nameof(FinalActivity), "Complete"));
+            //outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Tokyo"));
+            //outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "Seattle"));
+            //outputs.Add(await context.CallActivityAsync<string>(nameof(SayHello), "London"));
+            //outputs.Add(await context.CallActivityAsync<string>(nameof(FinalActivity), "Complete"));
 
-            return outputs;
+            try
+            {
+                var x = await context.CallActivityAsync<string>("SayHello", "first");
+                var y = await context.CallActivityAsync<string>("SayHello", x);
+                var z = await context.CallActivityAsync<string>("SayHello", y);
+                return await context.CallActivityAsync<string>("FinalActivity", z);
+            }
+            catch (Exception)
+            {
+                // Error handling or compensation goes here.
+                return "Error";
+            }
+
+            //return outputs;
         }
 
         [Function(nameof(SayHello))]
@@ -36,7 +50,7 @@ namespace DurableMemory
 
             _ = Task.Factory.StartNew(async () =>
             {
-                await MemoryClass.AddMemory(10, 500);
+                await MemoryClass.AddMemory(50, 10);
             });
 
             logger.LogInformation(MemoryClass.GetMemory()) ;
