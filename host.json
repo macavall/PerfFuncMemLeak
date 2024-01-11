@@ -2,11 +2,12 @@
   "version": "2.0",
   "extensions": {
     "durableTask": {
+      "hubName": "newTestHub222",
       "storageProvider": {
         "maxQueuePollingInterval": "00:00:01"
       },
-      "maxConcurrentActivityFunctions": 30,
-      "maxConcurrentOrchestratorFunctions": 10
+      "maxConcurrentActivityFunctions": 40,
+      "maxConcurrentOrchestratorFunctions": 4
     }
   },
     "logging": {
